@@ -1,68 +1,90 @@
-# README
+專案名稱：水質數據處理與分析
 
-## 專案名稱
-隨機插入 CSV 數據至 MySQL 資料庫
+介紹
 
-## 簡介
-本專案使用 Python 讀取 CSV 檔案的數據，並隨機選擇一行插入到 MySQL 資料庫中，每次插入後會等待一段時間（可自訂時間間隔）。
+此專案包含兩個主要的 Python 腳本，分別負責水質數據的清理與處理 (data_clean_all.py)，以及可視化分析 (main.py)。
 
-## 先決條件
-在運行本程式前，請確保已安裝以下環境與工具：
-- Python 3.x
-- MySQL 資料庫
-- 必要的 Python 套件（pymysql）
+目錄
 
-## 安裝步驟
-1. 安裝 Python 必要套件：
-   ```bash
-   pip install pymysql
-   ```
-2. 設定 MySQL 伺服器，並確保有可用的數據庫與表格。
+data_clean_all.py：
 
-## 使用方法
-1. 修改 `insert_random_data_from_csv` 函數中的資料庫連線資訊：
-   ```python
-   host = "192.168.50.84"
-   port = 3306
-   user = "sa"
-   password = "0000"
-   database = "demo"
-   table_name = "demo_PH_1102_pred"
-   csv_file_path = "PH_1102.csv"
-   interval_seconds = 5
-   ```
-2. 確保 `csv_file_path` 指向有效的 CSV 檔案。
-3. 執行程式：
-   ```bash
-   python your_script.py
-   ```
+讀取原始水質數據 (CSV 格式)
 
-## 主要功能
-- 檢查表是否存在，若不存在則自動建立。
-- 從 CSV 檔案讀取數據，隨機選取一行數據插入到 MySQL 資料庫。
-- 自動新增 ID 欄位並記錄當前時間。
-- 透過 `interval_seconds` 設定插入間隔時間。
+進行去頭尾平均處理
 
-## 程式邏輯
-1. 連接 MySQL 資料庫。
-2. 確保指定的表存在，若無則創建。
-3. 讀取 CSV 數據，檢查欄位名稱是否匹配。
-4. 取得當前最大 ID，確保 ID 連續。
-5. 隨機選取一行數據並插入。
-6. 以指定間隔時間（如 5 秒）重複插入過程。
+依照批次大小 (batch_size) 分段計算
 
-## 錯誤排除
-### 1. 無法連接 MySQL
-- 確保 MySQL 伺服器運行中。
-- 檢查 `host`、`port`、`user`、`password` 是否正確。
-- 確保用戶有對應的資料庫權限。
+儲存清理後的數據
 
-### 2. CSV 檔案讀取失敗
-- 確保 CSV 檔案存在且路徑正確。
-- 檢查 CSV 欄位名稱是否符合程式內預設的欄位。
+main.py：
 
-### 3. 資料未成功插入
-- 檢查 MySQL 表結構是否符合程式定義。
-- 確保 CSV 內的數據能轉換為 `FLOAT` 格式。
+讀取清理後的水質數據 (202501_clean.csv)
+
+計算 ODR、COD、NH3-N 等關鍵參數
+
+生成相關的趨勢圖並儲存
+
+依賴套件
+
+請確保已安裝以下 Python 套件：
+
+pip install pandas matplotlib numpy
+
+使用方式
+
+1. 執行數據清理
+
+python data_clean_all.py
+
+執行後會產生 202501_clean.csv。
+
+2. 執行數據分析與繪圖
+
+python main.py
+
+執行後將產生以下圖表：
+
+ORP_ODR.png
+
+COD_NH3N.png
+
+DO_DO-inference.png
+
+ODR_ODR-inference.png
+
+清理後的數據將儲存於 202501_clean.csv。
+
+主要函數說明
+
+data_clean_all.py
+
+data_clean(record_list): 移除最大與最小值後計算平均值。
+
+process_batches(df, ts_col, value_cols, batch_size): 依照批次大小處理數據，並計算去頭尾平均值。
+
+main.py
+
+linear(x, a, b): 線性函數。
+
+exp2_func(x, a, b): 指數函數。
+
+計算 ODR、COD、NH3-N，並繪製相應圖表。
+
+文件結構
+
+.
+├── data_clean_all.py  # 數據清理與預處理
+├── main.py            # 數據分析與可視化
+├── 202501_clean.csv   # 清理後的數據 (程式執行後產生)
+├── ORP_ODR.png        # ORP 與 ODR 圖
+├── COD_NH3N.png       # COD 與 NH3-N 圖
+├── DO_DO-inference.png # DO 預測對比圖
+└── ODR_ODR-inference.png # ODR 預測對比圖
+
+注意事項
+
+data_clean_all.py 需要對應的原始數據檔 202501.csv 才能執行。
+
+main.py 需要先執行 data_clean_all.py 來產生 202501_clean.csv，否則會無法運行。
 
 
